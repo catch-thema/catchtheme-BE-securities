@@ -1,11 +1,14 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
-class CompanyInfo(BaseModel):
+class SearchResult(BaseModel):
     company_name: str = Field(..., description="기업명")
     ticker: str = Field(..., description="종목 코드")
 
-class CompanySearchResponse(BaseModel):
+    class Config:
+        from_attributes = True
+
+class SearchResponse(BaseModel):
     status: str
     message: str
-    data: Optional[list[CompanyInfo]] = None
+    data: Optional[list[SearchResult]] = None
