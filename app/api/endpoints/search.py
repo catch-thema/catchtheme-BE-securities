@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Depends
 from app.schemas.search import SearchResponse
 from app.services.search_service import SearchService
-from app.core.constants import Status, Message
+from app.core.constants import HTTPStatus, Message, ErrorMessage
 from app.api.deps import get_search_repository
 from app.repositories.base import SearchRepositoryInterface
 
@@ -17,13 +17,13 @@ def search_company(
 
     if not results:
         return SearchResponse(
-            status=Status.OK,
-            message=Message.COMPANY_SEARCH_NOT_FOUND,
+            status=HTTPStatus.OK,
+            message=ErrorMessage.COMPANY_SEARCH_NOT_FOUND,
             data=[]
         )
     
     return SearchResponse(
-        status=Status.OK,
+        status=HTTPStatus.OK,
         message=Message.COMPANY_SEARCH_SUCCESS,
         data=results
     )

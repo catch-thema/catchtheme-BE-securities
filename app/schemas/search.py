@@ -9,6 +9,6 @@ class SearchResult(BaseModel):
         from_attributes = True
 
 class SearchResponse(BaseModel):
-    status: str
+    status: int
     message: str
     data: Optional[list[SearchResult]] = None
