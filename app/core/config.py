@@ -6,6 +6,10 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
 
+    KIS_APP_KEY: str = ""
+    KIS_APP_SECRET: str = ""
+    KIS_BASE_URL: str = ""
+
     class Config:
         env_file = ".env"
 
