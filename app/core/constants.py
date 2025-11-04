@@ -36,4 +36,29 @@ class KISAPIConfig:
     ADJUSTED_PRICE_TYPE_ADJUSTED = "0"
     ADJUSTED_PRICE_TYPE_ORIGINAL = "1"
 
+    FID_DIV_CLS_CODE_QUARTERLY = "1"
+    FID_DIV_CLS_CODE_ANNUAL = "0"
+
+    PRODUCT_TYPE_CODE_STOCK = "300"
+
+    TR_ID_INQUIRE_PRICE = "FHKST01010100"
+    TR_ID_SEARCH_STOCK_INFO = "CTPF1002R"
+    TR_ID_BALANCE_SHEET = "FHKST66430100"
+    TR_ID_INCOME_STATEMENT = "FHKST66430200"
+    TR_ID_FINANCIAL_RATIO = "FHKST66430300"
+    TR_ID_PROFIT_RATIO = "FHKST66430400"
+    TR_ID_STABILITY_RATIO = "FHKST66430600"
+    TR_ID_GROWTH_RATIO = "FHKST66430800"
     TR_ID_DAILY_CHART = "FHKST03010100"
+
+class KISAPIEndpoint:
+    OAUTH_TOKEN = "/oauth2/tokenP"
+    INQUIRE_PRICE = "/uapi/domestic-stock/v1/quotations/inquire-price"
+    SEARCH_STOCK_INFO = "/uapi/domestic-stock/v1/quotations/search-stock-info"
+    BALANCE_SHEET = "/uapi/domestic-stock/v1/finance/balance-sheet"
+    INCOME_STATEMENT = "/uapi/domestic-stock/v1/finance/income-statement"
+    FINANCIAL_RATIO = "/uapi/domestic-stock/v1/finance/financial-ratio"
+    PROFIT_RATIO = "/uapi/domestic-stock/v1/finance/profit-ratio"
+    STABILITY_RATIO = "/uapi/domestic-stock/v1/finance/stability-ratio"
+    GROWTH_RATIO = "/uapi/domestic-stock/v1/finance/growth-ratio"
+    DAILY_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
