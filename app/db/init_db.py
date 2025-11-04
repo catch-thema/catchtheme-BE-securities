@@ -1,6 +1,6 @@
 from app.db.base import Base
 from app.db.session import engine
-from app.models.company import Company
+from app.models.company import Company, StockInfo
 
 def create_tables():
     print("🔄 테이블 생성 중...")
