@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from app.schemas.search import SearchResult
-from app.schemas.stock_info import StockInfoDetail
+from app.schemas.stock_detail import StockDetailInfo
 
 class SearchRepositoryInterface(ABC):
 
@@ -12,5 +12,5 @@ class SearchRepositoryInterface(ABC):
 class StockInfoRepositoryInterface(ABC):
 
     @abstractmethod
-    def get_stock_info(self, ticker: str) -> Optional[StockInfoDetail]:
+    def get_stock_info(self, ticker: str) -> Optional[StockDetailInfo]:
         pass

@@ -4,14 +4,9 @@ from fastapi import Depends
 from app.db.session import get_db
 from app.core.config import settings
 from app.repositories.search_repository import MockSearchRepository, DBSearchRepository
-from app.repositories.stock_info_repository import MockStockInfoRepository, DBStockInfoRepository
 
 def get_search_repository(db: Session = Depends(get_db)):
+    """검색 레포지토리 의존성"""
     if settings.USE_MOCK_DATA:
         return MockSearchRepository()
     return DBSearchRepository(db)
-
-def get_stock_info_repository(db: Session = Depends(get_db)):
-    if settings.USE_MOCK_DATA:
-        return MockStockInfoRepository()
-    return DBStockInfoRepository(db)

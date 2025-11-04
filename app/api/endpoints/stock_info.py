@@ -1,21 +1,23 @@
-from fastapi import APIRouter, Path, Depends, HTTPException
-from app.schemas.stock_info import StockInfoResponse
-from app.services.stock_info_service import StockInfoService
-from app.core.constants import HTTPStatus, Message, ErrorMessage
-from app.api.deps import get_stock_info_repository
-from app.repositories.base import StockInfoRepositoryInterface
+from fastapi import APIRouter, Path, HTTPException, Depends
+from sqlalchemy.orm import Session
+
+from app.schemas.stock_detail import StockDetailResponse
+from app.repositories.stock_detail_repository import KISStockDetailRepository
+from app.core.constants import HTTPStatus, ErrorMessage, Message
+from app.db.session import get_db
 
 router = APIRouter()
 
-@router.get("/companies/stocks/{ticker}", response_model=StockInfoResponse)
+
+@router.get("/stocks/{ticker}", response_model=StockDetailResponse)
 def get_stock_info(
     ticker: str = Path(..., description="종목 코드 (예: 005930)", min_length=6, max_length=6),
-    repository: StockInfoRepositoryInterface = Depends(get_stock_info_repository)
+    db: Session = Depends(get_db)
 ):
-    service = StockInfoService(repository)
-    stock_info = service.get_stock_info(ticker)
+    repository = KISStockDetailRepository()
+    stock_detail = repository.get_stock_detail(ticker, db=db)
 
-    if not stock_info:
+    if not stock_detail:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail={
@@ -24,9 +26,9 @@ def get_stock_info(
                 "data": None
             }
         )
-    
-    return StockInfoResponse(
+
+    return StockDetailResponse(
         status=HTTPStatus.OK,
         message=Message.GET_STOCK_INFO_SUCCESS,
-        data=stock_info
+        data=stock_detail
     )

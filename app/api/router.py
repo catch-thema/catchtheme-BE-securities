@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.api.endpoints import (
-    health, 
+    health,
     search,
     stock_info
 )
