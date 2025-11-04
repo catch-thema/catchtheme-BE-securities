@@ -2,6 +2,7 @@ import httpx
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from app.core.config import settings
+from app.core.constants import KISAPIConfig, KISAPIEndpoint
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class KISClient:
         if self._is_token_valid():
             return self._access_token
 
-        url = f"{self.base_url}/oauth2/tokenP"
+        url = f"{self.base_url}{KISAPIEndpoint.OAUTH_TOKEN}"
         headers = {"content-type": "application/json"}
         body = {
             "grant_type": "client_credentials",
@@ -39,7 +40,6 @@ class KISClient:
                 data = response.json()
 
                 self._access_token = data["access_token"]
-                # 토큰은 24시간 유효하지만, 안전하게 23시간으로 설정
                 self._token_expires_at = datetime.now() + timedelta(hours=23)
 
                 logger.info("KIS API access token issued successfully")
@@ -55,19 +55,19 @@ class KISClient:
             return None
 
         token = self._get_access_token()
-        url = f"{self.base_url}/uapi/domestic-stock/v1/quotations/inquire-price"
+        url = f"{self.base_url}{KISAPIEndpoint.INQUIRE_PRICE}"
 
         headers = {
             "content-type": "application/json",
             "authorization": f"Bearer {token}",
             "appkey": self.app_key,
             "appsecret": self.app_secret,
-            "tr_id": "FHKST01010100"  # 국내주식 현재가 시세 조회
+            "tr_id": KISAPIConfig.TR_ID_INQUIRE_PRICE
         }
 
         params = {
-            "FID_COND_MRKT_DIV_CODE": "J",  # 시장 구분 코드 (J: 주식)
-            "FID_INPUT_ISCD": ticker  # 종목코드
+            "FID_COND_MRKT_DIV_CODE": KISAPIConfig.MARKET_DIV_CODE_KRX,
+            "FID_INPUT_ISCD": ticker
         }
 
         try:
@@ -88,24 +88,23 @@ class KISClient:
             return None
 
     def get_stock_basic_info(self, ticker: str) -> Optional[Dict[str, Any]]:
-        """주식 기본 조회 - 기업 기본 정보"""
         if len(ticker) != 6:
             logger.warning(f"Invalid ticker format: {ticker}")
             return None
 
         token = self._get_access_token()
-        url = f"{self.base_url}/uapi/domestic-stock/v1/quotations/search-stock-info"
+        url = f"{self.base_url}{KISAPIEndpoint.SEARCH_STOCK_INFO}"
 
         headers = {
             "content-type": "application/json",
             "authorization": f"Bearer {token}",
             "appkey": self.app_key,
             "appsecret": self.app_secret,
-            "tr_id": "CTPF1002R"
+            "tr_id": KISAPIConfig.TR_ID_SEARCH_STOCK_INFO
         }
 
         params = {
-            "PRDT_TYPE_CD": "300",
+            "PRDT_TYPE_CD": KISAPIConfig.PRODUCT_TYPE_CODE_STOCK,
             "PDNO": ticker
         }
 
@@ -127,22 +126,101 @@ class KISClient:
             return None
 
     def get_balance_sheet(self, ticker: str) -> Optional[Dict[str, Any]]:
-        return self._get_finance_data(ticker, "balance-sheet", "FHKST66430100", "대차대조표")
+        return self._get_finance_data(
+            ticker,
+            KISAPIEndpoint.BALANCE_SHEET,
+            KISAPIConfig.TR_ID_BALANCE_SHEET,
+            "대차대조표"
+        )
 
     def get_income_statement(self, ticker: str) -> Optional[Dict[str, Any]]:
-        return self._get_finance_data(ticker, "income-statement", "FHKST66430200", "손익계산서")
+        return self._get_finance_data(
+            ticker,
+            KISAPIEndpoint.INCOME_STATEMENT,
+            KISAPIConfig.TR_ID_INCOME_STATEMENT,
+            "손익계산서"
+        )
 
     def get_financial_ratio(self, ticker: str) -> Optional[Dict[str, Any]]:
-        return self._get_finance_data(ticker, "financial-ratio", "FHKST66430300", "재무비율")
+        return self._get_finance_data(
+            ticker,
+            KISAPIEndpoint.FINANCIAL_RATIO,
+            KISAPIConfig.TR_ID_FINANCIAL_RATIO,
+            "재무비율"
+        )
 
     def get_profit_ratio(self, ticker: str) -> Optional[Dict[str, Any]]:
-        return self._get_finance_data(ticker, "profit-ratio", "FHKST66430400", "수익성비율")
+        return self._get_finance_data(
+            ticker,
+            KISAPIEndpoint.PROFIT_RATIO,
+            KISAPIConfig.TR_ID_PROFIT_RATIO,
+            "수익성비율"
+        )
 
     def get_stability_ratio(self, ticker: str) -> Optional[Dict[str, Any]]:
-        return self._get_finance_data(ticker, "stability-ratio", "FHKST66430600", "안정성비율")
+        return self._get_finance_data(
+            ticker,
+            KISAPIEndpoint.STABILITY_RATIO,
+            KISAPIConfig.TR_ID_STABILITY_RATIO,
+            "안정성비율"
+        )
 
     def get_growth_ratio(self, ticker: str) -> Optional[Dict[str, Any]]:
-        return self._get_finance_data(ticker, "growth-ratio", "FHKST66430800", "성장성비율")
+        return self._get_finance_data(
+            ticker,
+            KISAPIEndpoint.GROWTH_RATIO,
+            KISAPIConfig.TR_ID_GROWTH_RATIO,
+            "성장성비율"
+        )
+
+    def get_period_price(
+        self,
+        ticker: str,
+        start_date: str,
+        end_date: str,
+        period_div_code: str,
+        adjusted_price_type: str = KISAPIConfig.ADJUSTED_PRICE_TYPE_ADJUSTED
+    ) -> Optional[Dict[str, Any]]:
+        if len(ticker) != 6:
+            logger.warning(f"Invalid ticker format: {ticker}")
+            return None
+
+        token = self._get_access_token()
+        url = f"{self.base_url}{KISAPIEndpoint.DAILY_CHART}"
+
+        headers = {
+            "content-type": "application/json",
+            "authorization": f"Bearer {token}",
+            "appkey": self.app_key,
+            "appsecret": self.app_secret,
+            "tr_id": KISAPIConfig.TR_ID_DAILY_CHART
+        }
+
+        params = {
+            "FID_COND_MRKT_DIV_CODE": KISAPIConfig.MARKET_DIV_CODE_KRX,
+            "FID_INPUT_ISCD": ticker,
+            "FID_INPUT_DATE_1": start_date,
+            "FID_INPUT_DATE_2": end_date,
+            "FID_PERIOD_DIV_CODE": period_div_code,
+            "FID_ORG_ADJ_PRC": adjusted_price_type
+        }
+
+        try:
+            with httpx.Client() as client:
+                response = client.get(url, headers=headers, params=params)
+                response.raise_for_status()
+                data = response.json()
+
+                if data.get("rt_cd") != "0":
+                    logger.error(f"KIS API period price error for {ticker}: {data.get('msg1')}")
+                    return None
+
+                logger.info(f"Successfully fetched period price data for {ticker}")
+                return data
+
+        except httpx.HTTPError as e:
+            logger.error(f"Failed to get period price data for {ticker}: {e}")
+            return None
 
     def _get_finance_data(
         self,
@@ -151,13 +229,12 @@ class KISClient:
         tr_id: str,
         data_name: str
     ) -> Optional[Dict[str, Any]]:
-        """재무 데이터 조회 공통 메서드"""
         if len(ticker) != 6:
             logger.warning(f"Invalid ticker format: {ticker}")
             return None
 
         token = self._get_access_token()
-        url = f"{self.base_url}/uapi/domestic-stock/v1/finance/{endpoint}"
+        url = f"{self.base_url}{endpoint}"
 
         headers = {
             "content-type": "application/json",
@@ -168,8 +245,8 @@ class KISClient:
         }
 
         params = {
-            "FID_DIV_CLS_CODE": "1",  # 1: 분기별 데이터 (최신 데이터)
-            "fid_cond_mrkt_div_code": "J",
+            "FID_DIV_CLS_CODE": KISAPIConfig.FID_DIV_CLS_CODE_QUARTERLY,
+            "fid_cond_mrkt_div_code": KISAPIConfig.MARKET_DIV_CODE_KRX,
             "fid_input_iscd": ticker
         }
 
@@ -187,7 +264,6 @@ class KISClient:
                 output = data.get("output")
                 logger.info(f"Successfully fetched {data_name} for {ticker}, output type: {type(output)}, length: {len(output) if isinstance(output, list) else 'N/A'}")
 
-                # 빈 리스트 체크
                 if isinstance(output, list) and len(output) == 0:
                     logger.warning(f"{data_name} returned empty list for {ticker}")
                     return None
