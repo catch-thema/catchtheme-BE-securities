@@ -144,6 +144,57 @@ class KISClient:
     def get_growth_ratio(self, ticker: str) -> Optional[Dict[str, Any]]:
         return self._get_finance_data(ticker, "growth-ratio", "FHKST66430800", "성장성비율")
 
+    def get_period_price(
+        self,
+        ticker: str,
+        start_date: str,
+        end_date: str,
+        period_div_code: str,
+        adjusted_price_type: str = "0"
+    ) -> Optional[Dict[str, Any]]:
+        from app.core.constants import KISAPIConfig
+
+        if len(ticker) != 6:
+            logger.warning(f"Invalid ticker format: {ticker}")
+            return None
+
+        token = self._get_access_token()
+        url = f"{self.base_url}/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+
+        headers = {
+            "content-type": "application/json",
+            "authorization": f"Bearer {token}",
+            "appkey": self.app_key,
+            "appsecret": self.app_secret,
+            "tr_id": KISAPIConfig.TR_ID_DAILY_CHART
+        }
+
+        params = {
+            "FID_COND_MRKT_DIV_CODE": KISAPIConfig.MARKET_DIV_CODE_KRX,
+            "FID_INPUT_ISCD": ticker,
+            "FID_INPUT_DATE_1": start_date,
+            "FID_INPUT_DATE_2": end_date,
+            "FID_PERIOD_DIV_CODE": period_div_code,
+            "FID_ORG_ADJ_PRC": adjusted_price_type
+        }
+
+        try:
+            with httpx.Client() as client:
+                response = client.get(url, headers=headers, params=params)
+                response.raise_for_status()
+                data = response.json()
+
+                if data.get("rt_cd") != "0":
+                    logger.error(f"KIS API period price error for {ticker}: {data.get('msg1')}")
+                    return None
+
+                logger.info(f"Successfully fetched period price data for {ticker}")
+                return data
+
+        except httpx.HTTPError as e:
+            logger.error(f"Failed to get period price data for {ticker}: {e}")
+            return None
+
     def _get_finance_data(
         self,
         ticker: str,
