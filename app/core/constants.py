@@ -11,6 +11,8 @@ class Message:
     COMPANY_SEARCH_SUCCESS = "기업 검색에 성공했습니다."
     GET_STOCK_INFO_SUCCESS = "종목 정보 조회에 성공했습니다."
     GET_STOCK_CHART_SUCCESS = "종목 차트 조회에 성공했습니다."
+    WEBSOCKET_CONNECTED = "실시간 지수 스트리밍이 시작되었습니다."
+    WEBSOCKET_DISCONNECTED = "실시간 지수 스트리밍이 종료되었습니다."
 
 class ErrorMessage:
     NOT_IMPLEMENTED = "해당 기능은 아직 구현되지 않았습니다."
@@ -22,6 +24,8 @@ class ErrorMessage:
     STOCK_CHART_NOT_FOUND = "종목 차트 데이터를 찾을 수 없습니다."
     INVALID_DATE_RANGE = "유효하지 않은 날짜 범위입니다."
     INVALID_PERIOD_TYPE = "유효하지 않은 기간 구분 코드입니다."
+    WEBSOCKET_CONNECTION_FAILED = "웹소켓 연결에 실패했습니다."
+    WEBSOCKET_AUTH_FAILED = "웹소켓 인증에 실패했습니다."
 
 class KISAPIConfig:
     MARKET_DIV_CODE_KRX = "J"
@@ -62,3 +66,18 @@ class KISAPIEndpoint:
     STABILITY_RATIO = "/uapi/domestic-stock/v1/finance/stability-ratio"
     GROWTH_RATIO = "/uapi/domestic-stock/v1/finance/growth-ratio"
     DAILY_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+
+class KISWebSocketConfig:
+    WEBSOCKET_URL = "ws://ops.koreainvestment.com:21000"
+
+    TR_ID_DOMESTIC_INDEX = "H0STCNI0"
+    TR_ID_OVERSEAS_INDEX = "HDFSASP0"
+
+    INDEX_CODE_KOSPI = "0001"
+    INDEX_CODE_KOSDAQ = "1001"
+    INDEX_CODE_NASDAQ = "NAS"
+    INDEX_CODE_SP500 = "SPX"
+
+    RECONNECT_DELAY = 5
+    PING_INTERVAL = 30
+    MAX_RECONNECT_ATTEMPTS = 10
