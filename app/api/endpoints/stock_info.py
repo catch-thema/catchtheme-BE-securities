@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Path, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
+from typing import List
+import math
 
 from app.schemas.stock_detail import StockDetailResponse
 from app.schemas.stock_chart import StockChartResponse
+from app.schemas.stock_list import StockListResponse, StockListData, PaginationMeta, StockInfo
 from app.repositories.stock_detail_repository import KISStockDetailRepository
 from app.repositories.stock_chart_repository import KISStockChartRepository
+from app.repositories.stock_list_repository import KRXStockListRepository
 from app.core.constants import HTTPStatus, ErrorMessage, Message, KISAPIConfig
 from app.db.session import get_db
 
@@ -103,3 +107,77 @@ def get_stock_chart(
         message=Message.GET_STOCK_CHART_SUCCESS,
         data=stock_chart
     )
+
+
+@router.get("/stocks", response_model=StockListResponse)
+def get_all_stocks(
+    page: int = Query(default=1, ge=1, description="페이지 번호 (1부터 시작)"),
+    count: int = Query(default=100, ge=1, le=1000, description="페이지당 항목 수 (최대 1000)"),
+    sort: str = Query(default="short_code", description="정렬 기준 (short_code, korean_name, listing_date 등)")
+):
+    repository = KRXStockListRepository()
+
+    try:
+        stocks = repository.get_all_stocks()
+
+        if not stocks:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail={
+                    "status": HTTPStatus.NOT_FOUND,
+                    "message": ErrorMessage.STOCK_NOT_FOUND,
+                    "data": None
+                }
+            )
+
+        sorted_stocks = _sort_stocks(stocks, sort)
+
+        total = len(sorted_stocks)
+        total_pages = math.ceil(total / count)
+
+        if page > total_pages:
+            page = total_pages
+
+        start_idx = (page - 1) * count
+        end_idx = start_idx + count
+        paginated_stocks = sorted_stocks[start_idx:end_idx]
+
+        return StockListResponse(
+            status=HTTPStatus.OK,
+            message=Message.GET_ALL_STOCKS_INFO_SUCCESS,
+            data=StockListData(
+                items=paginated_stocks,
+                pagination=PaginationMeta(
+                    total=total,
+                    page=page,
+                    count=count,
+                    total_pages=total_pages
+                )
+            )
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_ERROR,
+            detail={
+                "status": HTTPStatus.INTERNAL_ERROR,
+                "message": ErrorMessage.EXTERNAL_API_ERROR,
+                "data": None
+            }
+        )
+
+
+def _sort_stocks(stocks: List[StockInfo], sort_by: str) -> List[StockInfo]:
+    sort_key_map = {
+        "short_code": lambda x: x.short_code,
+        "korean_name": lambda x: x.korean_name,
+        "listing_date": lambda x: x.listing_date or "",
+        "market_type": lambda x: x.market_type or "",
+        "listed_shares": lambda x: x.listed_shares or 0
+    }
+
+    sort_key = sort_key_map.get(sort_by, lambda x: x.short_code)
+
+    return sorted(stocks, key=sort_key)
