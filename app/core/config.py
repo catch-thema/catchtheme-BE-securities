@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     KOREAEXIM_API_KEY: str = ""
     KOREAEXIM_BASE_URL: str = ""
 
+    NAVER_CLIENT_ID: str = ""
+    NAVER_CLIENT_SECRET: str = ""
+    NAVER_SEARCH_BASE_URL: str = ""
+
     class Config:
         env_file = ".env"
 
