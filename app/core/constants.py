@@ -11,6 +11,7 @@ class Message:
     COMPANY_SEARCH_SUCCESS = "기업 검색에 성공했습니다."
     GET_STOCK_INFO_SUCCESS = "종목 정보 조회에 성공했습니다."
     GET_STOCK_CHART_SUCCESS = "종목 차트 조회에 성공했습니다."
+    GET_EXCHANGE_RATE_SUCCESS = "환율 조회에 성공했습니다."
 
 class ErrorMessage:
     NOT_IMPLEMENTED = "해당 기능은 아직 구현되지 않았습니다."
@@ -22,6 +23,8 @@ class ErrorMessage:
     STOCK_CHART_NOT_FOUND = "종목 차트 데이터를 찾을 수 없습니다."
     INVALID_DATE_RANGE = "유효하지 않은 날짜 범위입니다."
     INVALID_PERIOD_TYPE = "유효하지 않은 기간 구분 코드입니다."
+    EXCHANGE_RATE_NOT_FOUND = "환율 정보를 찾을 수 없습니다."
+    EXCHANGE_RATE_API_ERROR = "환율 API 호출에 실패했습니다."
 
 class KISAPIConfig:
     MARKET_DIV_CODE_KRX = "J"
@@ -62,3 +65,10 @@ class KISAPIEndpoint:
     STABILITY_RATIO = "/uapi/domestic-stock/v1/finance/stability-ratio"
     GROWTH_RATIO = "/uapi/domestic-stock/v1/finance/growth-ratio"
     DAILY_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+
+class KoreaEximAPIConfig:
+    DATA_TYPE_AP01 = "AP01"
+    CURRENCY_CODE_USD = "USD"
+
+class KoreaEximAPIEndpoint:
+    EXCHANGE_RATE_JSON = "/site/program/financial/exchangeJSON"

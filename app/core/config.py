@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     KIS_APP_SECRET: str = ""
     KIS_BASE_URL: str = ""
 
+    KOREAEXIM_API_KEY: str = ""
+    KOREAEXIM_BASE_URL: str = ""
+
     class Config:
         env_file = ".env"
 
